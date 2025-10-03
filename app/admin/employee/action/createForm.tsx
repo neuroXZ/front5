@@ -17,7 +17,7 @@ export default function CreateEmployeeForm() {
   const [staffOrgId, setStaffOrgId] = useState("");
   const [staffOrg, setStaffOrg] = useState<StaffOrg[]>([]);
   const [gender, setGender] = useState("");
-  // const [password, setPassword] = useState("");
+  const [password, setPassword] = useState("");
   const [units, setUnits] = useState<Unit[]>([]);
   const [unitId, setUnitId] = useState<string>("");
   const [positions, setPositions] = useState<Position[]>([]);
@@ -36,25 +36,25 @@ export default function CreateEmployeeForm() {
     };
     fetchPositions();
 
-      const fetchUnits = async () => {
-        const token = Cookies.get("token");
-        const res = await fetch(`${API_BASE_URL}/unit`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        if (res.ok) setUnits(data);
-      };
-      fetchUnits();
+    const fetchUnits = async () => {
+      const token = Cookies.get("token");
+      const res = await fetch(`${API_BASE_URL}/unit`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) setUnits(data);
+    };
+    fetchUnits();
 
-      const fetchStaffOrg = async () => {
-        const token = Cookies.get("token");
-        const res = await fetch(`${API_BASE_URL}/staff`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const data = await res.json();
-        if (res.ok) setStaffOrg(data);
-      };
-      fetchStaffOrg();
+    const fetchStaffOrg = async () => {
+      const token = Cookies.get("token");
+      const res = await fetch(`${API_BASE_URL}/staff`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) setStaffOrg(data);
+    };
+    fetchStaffOrg();
 
   }, []);
 
@@ -75,7 +75,8 @@ export default function CreateEmployeeForm() {
       unitId: string;
       gender: string;
       staffOrgId: string;
-    } = { name, email, image, positionId, unitId, gender, staffOrgId };
+      password?: string;
+    } = { name, email, image, positionId, unitId, gender, staffOrgId, password };
     const res = await fetch(`${API_BASE_URL}/staff`, {
       method: "POST",
       headers: {
@@ -90,7 +91,7 @@ export default function CreateEmployeeForm() {
       setName("");
       setEmail("");
       setImage("");
-      // setPassword("");
+      setPassword("");
       setUnitId("");
       setPositionId("");
       setStaffOrgId("");
@@ -103,7 +104,7 @@ export default function CreateEmployeeForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4 max-w-sm mx-auto mt-4">
-      
+
 
       <Input
         name="name"
@@ -179,7 +180,14 @@ export default function CreateEmployeeForm() {
           ))}
         </SelectContent>
       </Select>
-
+      <Input
+        name="password"
+        className="bg-white text-black"
+        placeholder="Staff Password"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+      />
       {error && <div className="text-red-500">{error}</div>}
       {success && <div className="text-green-600">{success}</div>}
       <Button type="submit" className="w-full bg-white text-black">
