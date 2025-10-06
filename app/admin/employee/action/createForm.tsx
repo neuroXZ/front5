@@ -8,14 +8,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 type Position = { id: string; name: string };
 type Unit = { id: string; name: string };
-type StaffOrg = { id: string; name: string };
+type Supervisor = { id: string; name: string };
 
 export default function CreateEmployeeForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [image, setImage] = useState("");
+  const [supervisors, setSupervisors] = useState<Supervisor[]>([]);
+  const [supervisorId, setSupervisorId] = useState<string>("");
   const [staffOrgId, setStaffOrgId] = useState("");
-  const [staffOrg, setStaffOrg] = useState<StaffOrg[]>([]);
   const [gender, setGender] = useState("");
   const [password, setPassword] = useState("");
   const [units, setUnits] = useState<Unit[]>([]);
@@ -46,15 +47,15 @@ export default function CreateEmployeeForm() {
     };
     fetchUnits();
 
-    const fetchStaffOrg = async () => {
+    const fetchSupervisors = async () => {
       const token = Cookies.get("token");
       const res = await fetch(`${API_BASE_URL}/staff`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
-      if (res.ok) setStaffOrg(data);
+      if (res.ok) setSupervisors(data);
     };
-    fetchStaffOrg();
+    fetchSupervisors();
 
   }, []);
 
@@ -62,7 +63,7 @@ export default function CreateEmployeeForm() {
     e.preventDefault();
     setError("");
     setSuccess("");
-    if (!name || !email || !unitId || !positionId || !gender || !staffOrgId) {
+    if (!name || !email || !unitId || !positionId || !gender || !staffOrgId || !password || !supervisors) {
       setError("Sila isi semua field wajib.");
       return;
     }
@@ -75,8 +76,11 @@ export default function CreateEmployeeForm() {
       unitId: string;
       gender: string;
       staffOrgId: string;
+      supervisorId: string;
       password?: string;
-    } = { name, email, image, positionId, unitId, gender, staffOrgId, password };
+
+
+    } = { name, email, image, positionId, unitId, gender, staffOrgId, supervisorId, password };
     const res = await fetch(`${API_BASE_URL}/staff`, {
       method: "POST",
       headers: {
@@ -95,6 +99,7 @@ export default function CreateEmployeeForm() {
       setUnitId("");
       setPositionId("");
       setStaffOrgId("");
+      setSupervisorId("");
       setGender("");
       window.location.reload();
     } else {
@@ -106,6 +111,14 @@ export default function CreateEmployeeForm() {
     <form onSubmit={handleSubmit} className="space-y-4 max-w-sm mx-auto mt-4">
 
 
+      <Input
+        name="staffOrgId"
+        className="bg-white text-black"
+        placeholder="Nama Staff Organization"
+        value={staffOrgId}
+        onChange={(e) => setStaffOrgId(e.target.value)}
+        required
+      />
       <Input
         name="name"
         className="bg-white text-black"
@@ -168,12 +181,13 @@ export default function CreateEmployeeForm() {
         </SelectContent>
       </Select>
 
-      <Select value={staffOrgId} onValueChange={setStaffOrgId} required>
+      <Select value={supervisorId} onValueChange={setSupervisorId}>
         <SelectTrigger className="bg-white text-black w-full">
-          <SelectValue placeholder="Pilih Staff Organization" />
+          <SelectValue placeholder="Pilih Supervisor (Opsional)" />
         </SelectTrigger>
         <SelectContent className="h-60 w-full">
-          {staffOrg.map((ut) => (
+          <SelectItem value="">Tiada Supervisor</SelectItem>
+          {supervisors.map((ut) => (
             <SelectItem key={ut.id} value={ut.id}>
               {ut.name}
             </SelectItem>

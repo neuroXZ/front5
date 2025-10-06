@@ -15,11 +15,14 @@ interface position {
   id: string;
   name: string;
 }
-
+interface supervisor {
+  id: string;
+  name: string;
+}
 
 interface SearchProps {
-  searchColumn: "name" | "email" | "image" | "position" | "unit" | "staffOrgId";
-  setSearchColumn: (col: "name" | "email" | "image" | "position" | "unit" | "staffOrgId") => void;
+  searchColumn: "name" | "email" | "image" | "position" | "unit" | "staffOrgId" | "supervisor";
+  setSearchColumn: (col: "name" | "email" | "image" | "position" | "unit" | "staffOrgId" | "supervisor") => void;
   table: Table<Employee>;
   setColumnFilters: (filters: ColumnFiltersState) => void;
 }
@@ -32,6 +35,7 @@ export function DataTableSearch({
 }: SearchProps) {
   const [positions, setPositions] = React.useState<position[]>([]);
   const [units, setUnits] = React.useState<unit[]>([]);
+  const [supervisors, setSupervisors] = React.useState<supervisor[]>([]);
 
   React.useEffect(() => {
     const fetchPosition = async () => {
@@ -54,14 +58,23 @@ export function DataTableSearch({
     };
     fetchUnit();
 
-    
+    const fetchSupervisor = async () => {
+      const token = Cookies.get("token");
+      const res = await fetch(`${API_BASE_URL}/staff`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      if (res.ok) setSupervisors(data);
+    };
+    fetchSupervisor();
+
   }, []);
 
   return (
   <div className="mb-4 flex items-center gap-2">
       <select
         value={searchColumn}
-        onChange={e => setSearchColumn(e.target.value as "name" | "email" | "image" | "position" | "unit" | "staffOrgId")}
+        onChange={e => setSearchColumn(e.target.value as "name" | "email" | "image" | "position" | "unit" | "staffOrgId" | "supervisor")}
         className="border rounded px-2 py-1"
       >
         <option value="name">Name</option>
@@ -69,11 +82,12 @@ export function DataTableSearch({
         <option value="image">Image</option>
         <option value="position">Position</option>
         <option value="unit">Unit</option>
-        <option value="staffOrgId">Staff Org ID</option>
+        <option value="staffOrgId">Staff ID</option>
+        <option value="supervisor">Supervisor</option>
       </select>
       <div className="relative w-full max-w-sm flex items-center gap-2">
         <div className="flex-1">
-          {["position", "unit"].includes(searchColumn) ? (
+          {["position", "unit", "supervisor"].includes(searchColumn) ? (
             <Select
               isMulti
               options={
@@ -81,10 +95,12 @@ export function DataTableSearch({
                   ? positions.map(ut => ({ value: ut.name, label: ut.name }))
                   : searchColumn === "unit"
                   ? units.map(ut => ({ value: ut.name, label: ut.name }))
+                  : searchColumn === "supervisor"
+                  ? supervisors.map(ut => ({ value: ut.name, label: ut.name })) 
                   : []
               }
               value={
-                (searchColumn === "position" ? positions : searchColumn === "unit" ? units : [])
+                (searchColumn === "position" ? positions : searchColumn === "unit" ? units : searchColumn === "supervisor" ? supervisors : [])
                   .filter(ut => {
                     const filterValue = table.getColumn(searchColumn)?.getFilterValue();
                     return Array.isArray(filterValue) ? filterValue.includes(ut.name) : false;

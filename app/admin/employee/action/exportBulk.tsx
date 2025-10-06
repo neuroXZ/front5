@@ -9,6 +9,7 @@ interface Employee {
   gender: string;
   positionId: string;
   unitId: string;
+  supervisorId: string;
   staffOrgId: string;
   password?: string;
 
@@ -22,15 +23,20 @@ interface Unit {
   id: string;
   name: string;
 }
+interface Supervisor {
+  id: string;
+  name: string;
+}
 
 interface ExportButtonProps {
   data: Employee[];
   unit: Unit[];
   position: Position[];
+  supervisor: Supervisor[];
 }
 
-function convertToCSV(data: Employee[], unit: Unit[], position: Position[]) {
-  const header = ['name', 'email', 'gender', 'position', 'unit', 'staffOrgId'];
+function convertToCSV(data: Employee[], unit: Unit[], position: Position[], supervisor: Supervisor[]) {
+  const header = ['name', 'email', 'gender', 'position', 'unit', 'staffOrgId', 'supervisorId'];
   const rows = data.map(item => [
     `"${item.name.replace(/"/g, '""')}"`,
     `"${item.staffOrgId.replace(/"/g, '""')}"`,
@@ -38,6 +44,8 @@ function convertToCSV(data: Employee[], unit: Unit[], position: Position[]) {
     `"${item.gender?.replace(/"/g, '""') || ''}"`,
     `"${(position && Array.isArray(position) ? position.find(pos => pos.id === item.positionId)?.name : '') || ''}"`,
     `"${(unit && Array.isArray(unit) ? unit.find(ut => ut.id === item.unitId)?.name : '') || ''}"`,
+    `"${(supervisor && Array.isArray(supervisor) ? supervisor.find(sup => sup.id === item.supervisorId)?.name : '') || ''}"`,
+    
   ]);
   return [
     header.join(','),
@@ -45,9 +53,9 @@ function convertToCSV(data: Employee[], unit: Unit[], position: Position[]) {
   ].join('\r\n');
 }
 
-export default function ExportEmployeeCSVButton({ data, position, unit }: ExportButtonProps) {
+export default function ExportEmployeeCSVButton({ data, position, unit, supervisor }: ExportButtonProps) {
   const handleExport = () => {
-    const csv = convertToCSV(data, unit, position);
+    const csv = convertToCSV(data, unit, position, supervisor);
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
 

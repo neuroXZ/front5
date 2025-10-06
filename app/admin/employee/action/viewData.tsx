@@ -20,7 +20,7 @@ type Unit = {
   id: string;
   name: string;
 };
-type StaffOrg = {
+type Supervisor = {
   id: string;
   name: string;
 };
@@ -28,7 +28,7 @@ type StaffOrg = {
 export default function ViewData({ data }: ViewDataProps) {
   const [positionName, setPositionName] = useState<string>("");
   const [unitName, setUnitName] = useState<string>("");
-  const [staffOrgName, setStaffOrgName] = useState<string>("");
+  const [supervisorName, setSupervisorName] = useState<string>("");
 
   useEffect(() => {
     const fetchPosition = async () => {
@@ -69,14 +69,14 @@ export default function ViewData({ data }: ViewDataProps) {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
-        const staffOrg: StaffOrg = await res.json();
-        setStaffOrgName(staffOrg.name);
+        const supervisor: Supervisor = await res.json();
+        setSupervisorName(supervisor.name);
       } else {
-        setStaffOrgName("-");
+        setSupervisorName("-");
       }
     };
-    if (data.staffOrgId) fetchStaffOrgs();
-  }, [data.staffOrgId]);
+    if (data.supervisorId) fetchStaffOrgs();
+  }, [data.supervisorId]);
 
   return (
     <Dialog>
@@ -110,8 +110,8 @@ export default function ViewData({ data }: ViewDataProps) {
           <div className="w-full rounded-md border px-3 py-2 bg-muted">{positionName}</div>
           <div><span className="font-semibold">Unit:</span></div>
           <div className="w-full rounded-md border px-3 py-2 bg-muted">{unitName}</div>
-          <div><span className="font-semibold">Staff Organization:</span></div>
-          <div className="w-full rounded-md border px-3 py-2 bg-muted">{staffOrgName}</div>
+          <div><span className="font-semibold">Supervisor:</span></div>
+          <div className="w-full rounded-md border px-3 py-2 bg-muted">{supervisorName}</div>
 
           <div className="flex justify-end items-center gap-2">
             <span className="font-semibold text-primary">Action:</span>

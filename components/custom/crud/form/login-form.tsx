@@ -19,10 +19,10 @@ export function LoginForm() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Logging in with", { username, password });
+    console.log("Logging in with", { username, password, userType });
     try {
       const res = await axios.post(`${API_BASE_URL}/auth/login`, {
-        [userType === "staff" ? "email" : "username"]: username,
+        username: username, // Guna username untuk both admin and staff
         password,
         userType: userType,
       });
@@ -30,27 +30,34 @@ export function LoginForm() {
       if (res.data.token) {
         setToken(res.data.token);
         document.cookie = `token=${res.data.token}; path=/;`
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("userType", userType);
+        
         // Conditional redirect based on userType
         if (userType === "admin") {
           window.location.href = "/admin/dashboard";
         } else {
           window.location.href = "/staff/dashboard";
         }
+        alert("Login success!");
       } else {
-        
         alert("Token invalid or unavailable")
       }
-      alert("Login success!");
-    } catch {
+    } catch (error) {
+      console.error("Login error:", error);
       alert("Login failed");
     }
   };
 
   const getProfile = async () => {
     const token = localStorage.getItem("token");
+    const storedUserType = localStorage.getItem("userType");
     if (!token) return alert("No token found");
+    
     try {
-      const res = await axios.get(`${API_BASE_URL}/staff`, {
+      // Guna endpoint yang sesuai based on user type
+      const endpoint = storedUserType === "admin" ? "/admin" : "/staff";
+      const res = await axios.get(`${API_BASE_URL}${endpoint}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert(JSON.stringify(res.data));
@@ -83,15 +90,14 @@ export function LoginForm() {
                 </select>
               </div>
               <div className="grid gap-3">
-                <Label htmlFor="username">
-                  {userType === "staff" ? "Email" : "Username"}
-                </Label>
+                <Label htmlFor="username">Username</Label>
                 <input
-                  type={userType === "staff" ? "email" : "text"}
-                  placeholder={userType === "staff" ? "Email" : "Username"}
+                  type="text"
+                  placeholder="Username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="border p-2"
+                  className="border p-2 rounded"
+                  required
                 />
               </div>
               <div className="grid gap-3">
@@ -102,7 +108,8 @@ export function LoginForm() {
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="border p-2 w-full pr-10"
+                    className="border p-2 w-full pr-10 rounded"
+                    required
                   />
                   <button
                     type="button"
@@ -146,5 +153,3 @@ export function LoginForm() {
     </div>
   )
 }
-
-

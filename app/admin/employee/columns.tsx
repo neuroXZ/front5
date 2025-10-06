@@ -18,6 +18,7 @@ export type Employee = {
   positionId: string
   unitId: string
   staffOrgId: string
+  supervisorId: string
   password: string
 
 }
@@ -30,9 +31,13 @@ export type Unit = {
   id: string
   name: string
 }
+export type Supervisor = {
+  id: string
+  name: string
+}
 
 
-export const columns = (positions: Position[], units: Unit[]): ColumnDef<Employee>[] => [
+export const columns = (positions: Position[], units: Unit[], supervisors: Supervisor[]): ColumnDef<Employee>[] => [
 
   {
     id: "select",
@@ -77,7 +82,7 @@ export const columns = (positions: Position[], units: Unit[]): ColumnDef<Employe
   {
     accessorKey: "staffOrgId",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Staff Organization" />
+      <DataTableColumnHeader column={column} title="Staff ID" />
     ),
     cell: ({ row }) => <div className="capitalize">{row.getValue("staffOrgId")}</div>,
     footer: (props) => props.column.id,
@@ -159,7 +164,33 @@ export const columns = (positions: Position[], units: Unit[]): ColumnDef<Employe
       return false;
     },
   },
-
+  {
+    id: "supervisor",
+    accessorFn: (row) => {
+      const supervisor = supervisors.find(u => u.id === row.supervisorId);
+      return supervisor ? supervisor.name : "-";
+    },
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Supervisor Name" />
+    ),
+    cell: ({ row }) => {
+      const supervisor = supervisors.find(u => u.id === row.original.supervisorId);
+      return <div className="capitalize">{supervisor ? supervisor.name : '-'}</div>;
+    },
+    enableSorting: true,
+    enableHiding: true,
+    filterFn: (row, columnId, filterValue) => {
+      // filterValue boleh jadi string atau array
+      if (Array.isArray(filterValue)) {
+        return filterValue.includes(row.getValue(columnId));
+      }
+      const value = row.getValue(columnId);
+      if (typeof value === "string" && typeof filterValue === "string") {
+        return value.includes(filterValue);
+      }
+      return false;
+    },
+  },
 
   {
     accessorKey: "actions",

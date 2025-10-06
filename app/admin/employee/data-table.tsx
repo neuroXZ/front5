@@ -23,9 +23,10 @@ interface DataTableProps {
   data: Employee[];
   position?: { id: string; name: string }[];
   unit?: { id: string; name: string }[];
+  supervisor?: { id: string; name: string }[];
 }
 
-export function DataTable({ columns, data, position, unit }: DataTableProps) {
+export function DataTable({ columns, data, position, unit, supervisor }: DataTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
@@ -33,8 +34,9 @@ export function DataTable({ columns, data, position, unit }: DataTableProps) {
     gender: false,
     staffOrgId: false,
     unit: false,
+    supervisorId: false,
   });
-  const [searchColumn, setSearchColumn] = React.useState<"name" | "email" | "image" | "position" | "unit" | "staffOrgId">("name");
+  const [searchColumn, setSearchColumn] = React.useState<"name" | "email" | "image" | "position" | "unit" | "staffOrgId" | "supervisor">("name");
   const [importProgress, setImportProgress] = React.useState(0);
 
   const table = useReactTable<Employee>({
@@ -56,8 +58,8 @@ export function DataTable({ columns, data, position, unit }: DataTableProps) {
     initialState: {
       columnVisibility: {
         image: false,
-        email: false,  
-        
+        email: false,
+        supervisorId: false,
       }
     }
   });
@@ -94,7 +96,7 @@ export function DataTable({ columns, data, position, unit }: DataTableProps) {
               <div className="flex gap-1">
                 <Button variant="outline" className="bg-white text-black" onClick={() => {}}>Send Email</Button>
                 <ImportEmployeeCSV setImportProgress={setImportProgress} />
-                <ExportEmployeeCSVButton data={data} position={position || []} unit={unit || []} />
+                <ExportEmployeeCSVButton data={data} position={position || []} unit={unit || []} supervisor={supervisor || []} />
                 <DeleteBulk table={table} />
                 <ColumnFilter table={table} />
               </div>
