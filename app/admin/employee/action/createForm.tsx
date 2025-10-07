@@ -15,7 +15,7 @@ export default function CreateEmployeeForm() {
   const [email, setEmail] = useState("");
   const [image, setImage] = useState("");
   const [supervisors, setSupervisors] = useState<Supervisor[]>([]);
-  const [supervisorId, setSupervisorId] = useState<string>("");
+  const [supervisorId, setSupervisorId] = useState<string>("none");
   const [staffOrgId, setStaffOrgId] = useState("");
   const [gender, setGender] = useState("");
   const [password, setPassword] = useState("");
@@ -63,7 +63,7 @@ export default function CreateEmployeeForm() {
     e.preventDefault();
     setError("");
     setSuccess("");
-    if (!name || !email || !unitId || !positionId || !gender || !staffOrgId || !password || !supervisors) {
+    if (!name || !email || !unitId || !positionId || !gender || !staffOrgId || !password) {
       setError("Sila isi semua field wajib.");
       return;
     }
@@ -76,11 +76,23 @@ export default function CreateEmployeeForm() {
       unitId: string;
       gender: string;
       staffOrgId: string;
-      supervisorId: string;
+      supervisorId?: string;
       password?: string;
+    } = { 
+      name, 
+      email, 
+      image, 
+      positionId, 
+      unitId, 
+      gender, 
+      staffOrgId, 
+      password 
+    };
 
-
-    } = { name, email, image, positionId, unitId, gender, staffOrgId, supervisorId, password };
+    // Only add supervisorId if it's selected and not "none"
+    if (supervisorId && supervisorId.trim() !== "" && supervisorId !== "none") {
+      body.supervisorId = supervisorId;
+    }
     const res = await fetch(`${API_BASE_URL}/staff`, {
       method: "POST",
       headers: {
@@ -99,7 +111,7 @@ export default function CreateEmployeeForm() {
       setUnitId("");
       setPositionId("");
       setStaffOrgId("");
-      setSupervisorId("");
+      setSupervisorId("none");
       setGender("");
       window.location.reload();
     } else {
@@ -180,13 +192,13 @@ export default function CreateEmployeeForm() {
           ))}
         </SelectContent>
       </Select>
-
+      
       <Select value={supervisorId} onValueChange={setSupervisorId}>
         <SelectTrigger className="bg-white text-black w-full">
           <SelectValue placeholder="Pilih Supervisor (Opsional)" />
         </SelectTrigger>
         <SelectContent className="h-60 w-full">
-          <SelectItem value="">Tiada Supervisor</SelectItem>
+          <SelectItem value="none">Tiada Supervisor</SelectItem>
           {supervisors.map((ut) => (
             <SelectItem key={ut.id} value={ut.id}>
               {ut.name}
@@ -194,6 +206,8 @@ export default function CreateEmployeeForm() {
           ))}
         </SelectContent>
       </Select>
+
+      
       <Input
         name="password"
         className="bg-white text-black"

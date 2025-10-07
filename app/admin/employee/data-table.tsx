@@ -34,7 +34,7 @@ export function DataTable({ columns, data, position, unit, supervisor }: DataTab
     gender: false,
     staffOrgId: false,
     unit: false,
-    supervisorId: false,
+    supervisor: false,
   });
   const [searchColumn, setSearchColumn] = React.useState<"name" | "email" | "image" | "position" | "unit" | "staffOrgId" | "supervisor">("name");
   const [importProgress, setImportProgress] = React.useState(0);
